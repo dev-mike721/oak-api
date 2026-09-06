@@ -8,9 +8,14 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface LoteRepository extends JpaRepository<Lote, Integer> {
+
+    Optional<Lote> findTopByProductoIdAndCodigoLoteStartingWithOrderByCodigoLoteDesc(Integer productoId, String prefijo);
+
+    boolean existsByProductoIdAndCodigoLote(Integer productoId, String codigoLote);
 
     @Query("SELECT l FROM Lote l WHERE l.producto.id = :productoId AND l.cantidadActual > 0 " +
            "ORDER BY CASE WHEN l.fechaCaducidad IS NULL THEN 1 ELSE 0 END, " +
