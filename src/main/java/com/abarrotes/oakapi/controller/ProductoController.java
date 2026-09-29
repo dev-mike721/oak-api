@@ -41,6 +41,16 @@ public class ProductoController {
         return ResponseEntity.ok(productoService.buscarPorNombre(nombre));
     }
 
+    @GetMapping("/inactivos")
+    public ResponseEntity<List<ProductoResponseDto>> obtenerInactivos() {
+        return ResponseEntity.ok(productoService.obtenerInactivos());
+    }
+
+    @PutMapping("/{id}/reactivar")
+    public ResponseEntity<ProductoResponseDto> reactivar(@PathVariable Integer id) {
+        return ResponseEntity.ok(productoService.reactivarProducto(id));
+    }
+
     @PostMapping
     public ResponseEntity<ProductoResponseDto> crear(@Valid @RequestBody ProductoRequestDto request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productoService.crearProducto(request));

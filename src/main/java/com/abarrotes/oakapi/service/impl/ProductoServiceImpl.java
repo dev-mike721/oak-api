@@ -125,6 +125,26 @@ public class ProductoServiceImpl implements ProductoService {
         producto.setActivo(false);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductoResponseDto> obtenerInactivos() {
+        return productoRepository.findByActivoFalse().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public ProductoResponseDto reactivarProducto(Integer id) {
+        Producto producto = productoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado con ID: " + id));
+        if (Boolean.TRUE.equals(producto.getActivo())) {
+            throw new BusinessRuleException("El producto ya se encuentra activo");
+        }
+        producto.setActivo(true);
+        return mapToResponse(producto);
+    }
+
     private void validarPrecioBase(BigDecimal precioBase, boolean esCompuesto) {
         if (!esCompuesto && (precioBase == null || precioBase.compareTo(BigDecimal.ZERO) <= 0)) {
             throw new BusinessRuleException("Los productos simples deben tener un precio base mayor a cero");

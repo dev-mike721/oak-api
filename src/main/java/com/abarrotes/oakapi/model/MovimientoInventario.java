@@ -51,8 +51,8 @@ public class MovimientoInventario {
     @Column(name = "documento_tipo")
     private DocumentoOrigen documentoTipo;
 
-    @Column(name = "documento_id")
-    private Long documentoId;
+    @Column(name = "documento_id", length = 36)
+    private String documentoId;
 
     @Column(name = "fecha_hora", nullable = false, updatable = false)
     @Builder.Default

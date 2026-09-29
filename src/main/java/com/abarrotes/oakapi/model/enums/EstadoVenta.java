@@ -1,5 +1,6 @@
 package com.abarrotes.oakapi.model.enums;
 
-enum EstadoVenta {
-    COMPLETADA, CANCELADA
+public enum EstadoVenta {
+    COMPLETADA,
+    CANCELADA
 }

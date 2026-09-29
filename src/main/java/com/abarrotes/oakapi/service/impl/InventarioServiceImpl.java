@@ -147,7 +147,7 @@ public class InventarioServiceImpl implements InventarioService {
     @Override
     @Transactional
     public List<MovimientoInventarioResponseDto> consumirStockFEFO(Integer productoId, BigDecimal cantidad,
-                                                                   Integer usuarioId, Long documentoVentaId) {
+                                                                   Integer usuarioId, String documentoVentaId) {
         if (cantidad == null || cantidad.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessRuleException("La cantidad a consumir debe ser mayor a cero");
         }
@@ -203,7 +203,7 @@ public class InventarioServiceImpl implements InventarioService {
 
     private MovimientoInventario guardarMovimiento(Lote lote, Usuario usuario, TipoMovimientoInventario tipo,
                                                    BigDecimal cantidad, BigDecimal anterior, BigDecimal nueva,
-                                                   String motivo, DocumentoOrigen documentoTipo, Long documentoId) {
+                                                   String motivo, DocumentoOrigen documentoTipo, String documentoId) {
         return movimientoRepository.save(MovimientoInventario.builder()
                 .lote(lote)
                 .usuario(usuario)

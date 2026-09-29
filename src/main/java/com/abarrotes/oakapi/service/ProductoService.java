@@ -12,4 +12,6 @@ public interface ProductoService {
     ProductoResponseDto crearProducto(ProductoRequestDto request);
     ProductoResponseDto actualizarProducto(Integer id, ProductoRequestDto request);
     void eliminarProducto(Integer id);
+    List<ProductoResponseDto> obtenerInactivos();
+    ProductoResponseDto reactivarProducto(Integer id);
 }

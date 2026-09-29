@@ -23,6 +23,6 @@ public class MovimientoInventarioResponseDto {
     private BigDecimal cantidadNueva;
     private String motivo;
     private DocumentoOrigen documentoTipo;
-    private Long documentoId;
+    private String documentoId;
     private LocalDateTime fechaHora;
 }

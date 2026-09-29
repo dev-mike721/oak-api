@@ -14,4 +14,5 @@ public interface ProductoRepository extends JpaRepository<Producto, Integer> { /
     List<Producto> findByNombreContainingIgnoreCaseAndActivoTrue(String nombre);
     boolean existsByPlu(String plu);
     boolean existsByPluAndIdNot(String plu, Integer id);
+    List<Producto> findByActivoFalse();
 }

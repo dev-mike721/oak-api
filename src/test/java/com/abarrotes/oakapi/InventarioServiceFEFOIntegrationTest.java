@@ -114,7 +114,7 @@ class InventarioServiceFEFOIntegrationTest {
 
     @Test
     void generaMovimientosConSnapshotCorrecto() {
-        inventarioService.consumirStockFEFO(productoId, new BigDecimal("6"), usuarioId, 999L);
+        inventarioService.consumirStockFEFO(productoId, new BigDecimal("6"), usuarioId, "f47ac10b-58cc-4372-a567-0e02b2c3d479");
 
         List<com.abarrotes.oakapi.model.MovimientoInventario> salidas =
                 movimientoInventarioRepository.findAll().stream()
@@ -126,7 +126,7 @@ class InventarioServiceFEFOIntegrationTest {
         salidas.forEach(m -> {
             assertEquals(TipoMovimientoInventario.SALIDA_VENTA, m.getTipoMovimiento());
             assertEquals(com.abarrotes.oakapi.model.enums.DocumentoOrigen.VENTA, m.getDocumentoTipo());
-            assertEquals(999L, m.getDocumentoId());
+            assertEquals("f47ac10b-58cc-4372-a567-0e02b2c3d479", m.getDocumentoId());
             assertEquals(0, m.getCantidadAnterior().subtract(m.getCantidad()).compareTo(m.getCantidadNueva()),
                     "Debe cumplirse anterior - cantidad = nueva en cada movimiento");
         });

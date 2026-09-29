@@ -26,5 +26,5 @@ public interface InventarioService {
                                                     TipoMovimientoInventario tipo, Pageable pageable);
 
     List<MovimientoInventarioResponseDto> consumirStockFEFO(Integer productoId, BigDecimal cantidad,
-                                                            Integer usuarioId, Long documentoVentaId);
+                                                            Integer usuarioId, String documentoVentaId);
 }

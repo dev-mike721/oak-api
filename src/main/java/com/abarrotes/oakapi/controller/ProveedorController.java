@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/proveedores")
 @RequiredArgsConstructor
@@ -28,6 +30,16 @@ public class ProveedorController {
     @GetMapping("/{id}")
     public ResponseEntity<ProveedorResponseDto> buscarPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(proveedorService.buscarPorId(id));
+    }
+
+    @GetMapping("/inactivos")
+    public ResponseEntity<List<ProveedorResponseDto>> obtenerInactivos() {
+        return ResponseEntity.ok(proveedorService.obtenerInactivos());
+    }
+
+    @PutMapping("/{id}/reactivar")
+    public ResponseEntity<ProveedorResponseDto> reactivar(@PathVariable Integer id) {
+        return ResponseEntity.ok(proveedorService.reactivar(id));
     }
 
     @PostMapping

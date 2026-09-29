@@ -148,7 +148,7 @@ public class CompraServiceImpl implements CompraService {
             lote.setCantidadActual(nueva);
             guardarMovimiento(lote, usuario, TipoMovimientoInventario.AJUSTE_NEGATIVO,
                     detalle.getCantidad(), anterior, nueva,
-                    "Cancelación de compra #" + id, DocumentoOrigen.COMPRA, id.longValue());
+                    "Cancelación de compra #" + id, DocumentoOrigen.COMPRA, String.valueOf(id));
         }
 
         compra.setEstado(EstadoCompra.CANCELADA);
@@ -176,7 +176,7 @@ public class CompraServiceImpl implements CompraService {
 
         guardarMovimiento(lote, usuario, TipoMovimientoInventario.ENTRADA_COMPRA,
                 linea.getCantidad(), BigDecimal.ZERO, linea.getCantidad(),
-                "Compra #" + compraId + " - Lote " + codigoLote, DocumentoOrigen.COMPRA, compraId.longValue());
+                "Compra #" + compraId + " - Lote " + codigoLote, DocumentoOrigen.COMPRA, String.valueOf(compraId));
         return lote;
     }
 
@@ -217,7 +217,7 @@ public class CompraServiceImpl implements CompraService {
 
     private MovimientoInventario guardarMovimiento(Lote lote, Usuario usuario, TipoMovimientoInventario tipo,
                                                    BigDecimal cantidad, BigDecimal anterior, BigDecimal nueva,
-                                                   String motivo, DocumentoOrigen documentoTipo, Long documentoId) {
+                                                   String motivo, DocumentoOrigen documentoTipo, String documentoId) {
         return movimientoRepository.save(MovimientoInventario.builder()
                 .lote(lote)
                 .usuario(usuario)

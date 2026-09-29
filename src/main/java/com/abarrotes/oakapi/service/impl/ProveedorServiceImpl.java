@@ -2,6 +2,7 @@ package com.abarrotes.oakapi.service.impl;
 
 import com.abarrotes.oakapi.dto.request.ProveedorRequestDto;
 import com.abarrotes.oakapi.dto.response.ProveedorResponseDto;
+import com.abarrotes.oakapi.exception.BusinessRuleException;
 import com.abarrotes.oakapi.exception.DuplicateResourceException;
 import com.abarrotes.oakapi.exception.ResourceNotFoundException;
 import com.abarrotes.oakapi.model.Proveedor;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +85,26 @@ public class ProveedorServiceImpl implements ProveedorService {
     public void eliminar(Integer id) {
         Proveedor proveedor = obtenerProveedorActivo(id);
         proveedor.setActivo(false);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProveedorResponseDto> obtenerInactivos() {
+        return proveedorRepository.findByActivoFalse().stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public ProveedorResponseDto reactivar(Integer id) {
+        Proveedor proveedor = proveedorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Proveedor no encontrado con ID: " + id));
+        if (Boolean.TRUE.equals(proveedor.getActivo())) {
+            throw new BusinessRuleException("El proveedor ya se encuentra activo");
+        }
+        proveedor.setActivo(true);
+        return mapToResponse(proveedor);
     }
 
     private Proveedor obtenerProveedorActivo(Integer id) {
