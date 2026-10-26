@@ -22,7 +22,7 @@ Backend REST para ventas, inventario, precios, crédito y caja en comercios de c
 La mayoría de los puntos de venta se construyen para un solo tipo de negocio. Oak separa el **núcleo transaccional** del catálogo: la misma API sirve para una papelería, una ferretería, una farmacia o una tienda de abarrotes.
 
 - **Multi-giro real**: productos simples y compuestos, venta a granel, lotes con caducidad, series/IMEI, listas de precios y crédito conviven en el mismo modelo.
-- **API-first y headless**: cualquier cliente puede consumirla. La SPA **Oak POS** es solo una de las interfaces posibles.
+- **API-first y headless**: cualquier cliente puede consumirla. **Oak POS** es solo una de las interfaces posibles.
 - **Trazabilidad**: movimientos de inventario inmutables, snapshots de precio e impuesto, folios consecutivos y auditoría por usuario.
 - **Operación de mostrador**: turnos, cajas, autorizaciones, arqueo, cancelaciones con reversa y ventas a crédito.
 - **Pensada para México**: RFC, régimen fiscal, catálogo de impuestos SAT y series de folios.
