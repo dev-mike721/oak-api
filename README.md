@@ -49,7 +49,7 @@ El giro no se configura con módulos separados, sino con catálogos, impuestos, 
 
 ## Estado del proyecto
 
-Backend funcional y cubierto por pruebas. La SPA **Oak POS** consume esta API para dashboard, inventario y ventas.
+Backend funcional y cubierto por pruebas. **Oak POS** consume esta API para dashboard, inventario y ventas.
 
 | Métrica | Valor |
 |---|---|
