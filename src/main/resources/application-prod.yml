@@ -1,0 +1,74 @@
+spring:
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: false
+        hbm2ddl.auto: none
+        javax.persistence.validation.mode: none
+        hibernate.validator.apply_to_ddl: false
+        hibernate.validator.autoregister_listeners: false
+  datasource:
+    url: jdbc:mariadb://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:tienda_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: 28800000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,httpexchanges
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+    httpexchanges:
+      enabled: true
+      # ventana de peticiones guardadas en memoria para consulta
+      buffer:
+        capacity: 100
+
+oak-api:
+  logging:
+    enabled: true
+    log-body: false
+    max-body-length: 2000
+    ignore-paths:
+      - /actuator/health
+      - /actuator/info
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    com.abarrotes.oakapi: INFO
+  file:
+    name: logs/oak-api.log
+    max-size: 100MB
+    max-history: 30
+    total-size-cap: 3GB
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html

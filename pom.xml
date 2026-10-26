@@ -12,19 +12,26 @@
     <artifactId>oak-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>oak-api</name>
-    <description>oak-api</description>
-    <url/>
+    <description>Backend REST para punto de venta, inventario, precios y credito multi-giro</description>
+    <url>https://github.com/dev-mike721/oak-api</url>
     <licenses>
-        <license/>
+        <license>
+            <name>Proprietary</name>
+            <url>https://github.com/dev-mike721/oak-api/blob/master/LICENSE</url>
+            <distribution>manual</distribution>
+        </license>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <name>Jose Miguel Perez Rodriguez</name>
+            <url>https://github.com/dev-mike721</url>
+        </developer>
     </developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:git@github.com:dev-mike721/oak-api.git</connection>
+        <developerConnection>scm:git:git@github.com:dev-mike721/oak-api.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/dev-mike721/oak-api</url>
     </scm>
     <properties>
         <java.version>21</java.version>
@@ -150,9 +157,9 @@
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>9.22.3</version>
                 <configuration>
-                    <url>jdbc:mysql://localhost:3306/tienda_db?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true</url>
-                    <user>root</user>
-                    <password>0131</password>
+                    <url>jdbc:mysql://${env.DB_HOST}:${env.DB_PORT}/${env.DB_NAME}?useSSL=false&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true</url>
+                    <user>${env.DB_USER}</user>
+                    <password>${env.DB_PASSWORD}</password>
                     <locations>
                         <location>classpath:db/migration</location>
                     </locations>

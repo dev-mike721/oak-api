@@ -29,7 +29,7 @@
 
 # En BD limpia (primera vez)
 ./mvnw flyway:migrate
-# Verifica: 12 migraciones aplicadas, última versión = 12
+# Verifica: 14 migraciones aplicadas (V1, V3-V15), última versión = 15
 ```
 
 ## Inyección de Secrets
@@ -45,6 +45,8 @@ ExecStart=/usr/bin/java -jar -Dspring.profiles.active=prod /opt/oak-api/oak-api.
 ```
 
 ### Docker
+> El `Dockerfile` aún no está incluido en el repositorio. La imagen de GHCR se publicará cuando se agregue.
+
 ```yaml
 # docker-compose.yml
 services:
@@ -110,10 +112,10 @@ SPRING_PROFILES_ACTIVE=prod java -jar oak-api.jar
 
 ```bash
 # Health check
-curl http://localhost:8081/actuator/health
+curl http://localhost:8081/api/v1/actuator/health
 # Respuesta esperada: {"status":"UP", "components":{"db":"UP","diskSpace":"UP"}}
 
-# Verificar logs JSON
+# Verificar logs
 tail -f logs/oak-api.log | head -5
 # Formato: 2026-10-01 14:30:00 [main] INFO  com.abarrotes.oakapi.OakApiApplication - Started
 ```
@@ -121,10 +123,10 @@ tail -f logs/oak-api.log | head -5
 ## Verificación Funcional Rápida
 
 ```bash
-# 1. Login
+# 1. Login (usuario demo del seed)
 TOKEN=$(curl -s -X POST http://localhost:8081/api/v1/auth/login \
   -H 'Content-Type: application/json' \
-  -d '{"username":"admin","password":"test1234"}' | jq -r .token)
+  -d '{"username":"rosa","password":"abarrotes123"}' | jq -r .token)
 
 # 2. Abrir turno
 curl -X POST http://localhost:8081/api/v1/turnos/solicitar \
@@ -165,19 +167,19 @@ cp oak-api-prev.jar oak-api.jar
 systemctl start oak-api  # o docker start oak-api
 
 # 4. Verificar health
-curl http://localhost:8081/actuator/health
+curl http://localhost:8081/api/v1/actuator/health
 ```
 
 ## Checklist Post-Despliegue
 
 - [ ] Health endpoint responde `UP`
-- [ ] Logs en formato JSON, sin SQL
+- [ ] Logs a archivo, sin SQL
 - [ ] Login y JWT funcionan
 - [ ] Turno se abre correctamente
 - [ ] Venta EFECTIVO registrada con impuestos
 - [ ] Venta CREDITO genera `saldo_pendiente` y `fecha_vencimiento`
 - [ ] Cuenta corriente muestra saldos correctos
-- [ ] Métricas Prometheus en `/actuator/prometheus`
+- [ ] Métricas Prometheus en `/api/v1/actuator/prometheus` (requiere `micrometer-registry-prometheus`, pendiente)
 - [ ] Backups BD programados (mysqldump diario)
 
 ## Contacto

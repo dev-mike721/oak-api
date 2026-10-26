@@ -1,0 +1,80 @@
+LICENCIA PROPIETARIA DE SOFTWARE
+Uso interno para colaboradores autorizados
+
+Copyright (c) 2026 Jose Miguel Perez Rodriguez
+Todos los derechos reservados.
+
+Este software, junto con su código fuente, documentación, diseños, esquemas de base
+de datos, archivos de configuración y demás materiales asociados (en adelante, el
+"Software"), es propiedad exclusiva de Jose Miguel Perez Rodriguez (en adelante, el
+"Titular") y está protegido por las leyes de propiedad intelectual aplicables.
+
+1. PERMISO LIMITADO
+
+Se concede a los colaboradores expresamente autorizados por el Titular un permiso
+limitado, no exclusivo, no transferible y revocable para:
+
+   a) acceder y clonar el Software;
+   b) ejecutarlo en entornos de desarrollo y prueba;
+   c) modificarlo y crear ramas de trabajo;
+   d) evaluarlo internamente como parte del proyecto Oak POS.
+
+Este permiso no transfiere la propiedad del Software ni concede derechos sobre la
+marca, el nombre comercial o los signos distintivos del Titular.
+
+2. RESTRICCIONES
+
+Salvo autorización previa y por escrito del Titular, no está permitido:
+
+   a) redistribuir, publicar, sublicenciar, vender, alquilar, prestar o poner el
+      Software a disposición de terceros;
+   b) usar el Software en producción, o prestar servicios a terceros con él;
+   c) incorporar el Software, total o parcialmente, en productos o servicios
+      comerciales;
+   d) distribuir versiones modificadas o creaciones derivadas;
+   e) eliminar, ocultar o alterar avisos de copyright, licencia o propiedad;
+   f) usar el Software para desarrollar un producto competidor.
+
+El Titular conserva todos los derechos de uso comercial, producción, distribución
+y explotación del Software.
+
+3. CONFIDENCIALIDAD
+
+El Software es información confidencial del Titular. Los colaboradores autorizados
+deben protegerlo con al menos el mismo cuidado que aplican a su propia información
+confidencial y no divulgar su contenido a personas no autorizadas.
+
+4. CONTRIBUCIONES
+
+Al enviar contribuciones al proyecto, el colaborador otorga al Titular una licencia
+perpetua, irrevocable, mundial y libre de regalías para usar, reproducir, modificar,
+distribuir y explotar dichas contribuciones como parte del Software.
+
+5. SIN GARANTÍAS
+
+El Software se proporciona "TAL CUAL", sin garantías de ningún tipo, expresas o
+implícitas, incluyendo, sin limitación, garantías de comerciabilidad, idoneidad para
+un propósito particular, ausencia de errores o no infracción.
+
+6. LIMITACIÓN DE RESPONSABILIDAD
+
+En la máxima medida permitida por la ley, el Titular no será responsable por daños
+directos, indirectos, incidentales, especiales, consecuentes o punitivos, ni por
+pérdida de datos, lucro cesante o interrupción del negocio, derivados del uso o de
+la imposibilidad de usar el Software.
+
+7. TERMINACIÓN
+
+Cualquier incumplimiento de esta licencia termina automáticamente el permiso
+otorgado. El colaborador deberá dejar de usar el Software y destruir o eliminar
+todas las copias en su posesión, salvo aquellas que deba conservar por obligación
+legal.
+
+8. LEY APLICABLE
+
+Esta licencia se interpreta conforme a las leyes de los Estados Unidos Mexicanos.
+Cualquier controversia se someterá a los tribunales competentes del domicilio del
+Titular.
+
+Para solicitar una licencia comercial o cualquier autorización adicional, contacta
+al Titular a través de https://github.com/dev-mike721.

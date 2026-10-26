@@ -21,11 +21,16 @@ public class TestDatabaseConfig {
     @Bean
     public DataSource dataSource() {
         String uniqueDbName = "tienda_db_test_" + UUID.randomUUID().toString().replace("-", "");
+        String host = System.getenv().getOrDefault("DB_HOST", "localhost");
+        String port = System.getenv().getOrDefault("DB_PORT", "3306");
+        String user = System.getenv().getOrDefault("DB_USER", "root");
+        String password = System.getenv().getOrDefault("DB_PASSWORD", "test");
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("org.mariadb.jdbc.Driver");
-        dataSource.setUrl("jdbc:mariadb://localhost:3306/" + uniqueDbName + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true");
-        dataSource.setUsername("root");
-        dataSource.setPassword("0131");
+        dataSource.setUrl("jdbc:mariadb://" + host + ":" + port + "/" + uniqueDbName
+                + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true");
+        dataSource.setUsername(user);
+        dataSource.setPassword(password);
         return dataSource;
     }
 

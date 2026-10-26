@@ -47,7 +47,7 @@ spring:
       add-mappings: false
 
 jwt:
-  secret: ${JWT_SECRET:saludosdesuamigoelhalcondelasierra}
+  secret: ${JWT_SECRET}
   expiration-ms: 28800000 # 8 horas de turno
 
 management:

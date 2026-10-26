@@ -1,455 +1,482 @@
 <div align="center">
 
-# 🌿 Oak API
+# Oak API
 
-**Backend REST para el sistema de gestión de inventario de una tienda de abarrotes**
+**El núcleo de tu punto de venta**
 
-API moderna, segura y auditable para administrar productos, productos compuestos (recetas/BOM), lotes con caducidad, movimientos de inventario bajo la política **FEFO** (*First Expired, First Out*), alertas de vencimiento y valorización del stock.
+Backend REST para ventas, inventario, precios, crédito y caja en comercios de cualquier giro.
+
+[![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white)](https://openjdk.org/projects/jdk/21/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.1.0-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![MariaDB](https://img.shields.io/badge/MariaDB-10.11+-003545?logo=mariadb&logoColor=white)](https://mariadb.org/)
+[![Flyway](https://img.shields.io/badge/Flyway-9.22.3-CC0200?logo=flyway&logoColor=white)](https://flywaydb.org/)
+[![Tests](https://img.shields.io/badge/tests-81-2ea44f)](.)
+[![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
 </div>
 
 ---
 
-## ✨ Características
+## Por qué Oak
 
-- **Autenticación JWT** con roles (`ADMINISTRADOR`, `GERENTE`, `CAJERO`, `SUPERVISOR`) y contraseñas cifradas con BCrypt.
-- **Gestión de productos** con PLU, categoría, unidad de medida (pieza, kg, gramo, litro) y soporte de decimales para productos a granel.
-- **Productos compuestos**: modelado de recetas/combos a partir de productos simples, con cálculo automático de **precio sugerido**.
-- **Trazabilidad por lotes**: costo de compra, cantidad inicial/actual, fecha de recepción y caducidad.
-- **Consumo FEFO**: despacho automático de stock priorizando el lote con caducidad más próxima, con **bloqueo pesimista** para evitar condiciones de carrera.
-- **Ajustes de inventario** manuales (positivo, negativo, merma) con validaciones de stock y auditoría completa por usuario.
-- **Alertas de caducidad** con niveles semafóricos: 🔴 rojo (≤ 15 días), 🟡 amarillo (≤ 30 días), 🟢 verde (> 30 días).
-- **Valorización de inventario** por categoría (cantidad actual × costo de compra).
-- **Historial de movimientos** paginado y filtrable por lote, producto y tipo de movimiento.
-- **Manejo global de excepciones** con respuestas de error consistentes y semántica HTTP correcta.
-- **Datos de demostración** precargados (categorías, 10 productos simples y 3 combos).
-- **Gestión de listas de precios** con escalones de volumen, listas por canal/cliente y precios especiales por cliente-producto.
-- **Resolución de precios por prioridad**: Precio Especial > Lista Cliente > Lista Canal Default > Precio Base.
-- **Cálculo de impuestos por línea** en ventas (IVA, IEPS, retenciones) con snapshot de tasas.
-- **Ventas a crédito** con control de saldo pendiente, fecha de vencimiento y aplicación FIFO de pagos.
-- **Presupuestos** con ciclo de vida (BORRADOR → ENVIADO → APROBADO → CONVERTIDO) y conversión a venta.
-- **Series/IMEI** para productos serializados con estados (DISPONIBLE, VENDIDO, RESERVADO, GARANTÍA, DEVUELTO).
-- **Turnos de caja** con apertura/cierre, autorización, conciliación y asignación a caja física.
-- **Caché inteligente** en resolución de precios (Caffeine, TTL 5 min) con invalidación automática.
+La mayoría de los puntos de venta se construyen para un solo tipo de negocio. Oak separa el **núcleo transaccional** del catálogo: la misma API sirve para una papelería, una ferretería, una farmacia o una tienda de abarrotes.
+
+- **Multi-giro real**: productos simples y compuestos, venta a granel, lotes con caducidad, series/IMEI, listas de precios y crédito conviven en el mismo modelo.
+- **API-first y headless**: cualquier cliente puede consumirla. La SPA **Oak POS** es solo una de las interfaces posibles.
+- **Trazabilidad**: movimientos de inventario inmutables, snapshots de precio e impuesto, folios consecutivos y auditoría por usuario.
+- **Operación de mostrador**: turnos, cajas, autorizaciones, arqueo, cancelaciones con reversa y ventas a crédito.
+- **Pensada para México**: RFC, régimen fiscal, catálogo de impuestos SAT y series de folios.
+
+> Oak no es un ERP. Es el motor de ventas e inventario sobre el que se puede construir uno.
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Verticales
 
-| Capa        | Tecnología                                             |
-|-------------|--------------------------------------------------------|
-| Lenguaje    | [Java 21](https://openjdk.org/projects/jdk/21/)        |
-| Framework   | [Spring Boot 4.1.0](https://spring.io/projects/spring-boot) |
-| Persistencia| Spring Data JPA / Hibernate                            |
-| Seguridad   | Spring Security + JJWT 0.12.5 (tokens JWT, BCrypt)     |
-| Validación  | Jakarta Bean Validation                                |
-| Base de datos | MySQL 8+ / MariaDB 10.11+ (mysql-connector-j)        |
-| Migraciones | Flyway 9.22.3 (con flyway-mysql)                      |
-| Cache       | Caffeine                                               |
-| Build       | Maven 3.9+                                             |
-| Auxiliares  | Lombok 1.18.48                                         |
-| CI/CD       | GitHub Actions                                         |
-| Documentación | OpenAPI 3 (springdoc-openapi 2.6)                    |
+El giro no se configura con módulos separados, sino con catálogos, impuestos, listas de precios y reglas de operación.
+
+| Giro | Qué resuelve | Capacidades clave |
+|---|---|---|
+| Abarrotes y conveniencia | Venta diaria, granel y crédito de barrio | Lotes y caducidad (FEFO), decimales, crédito FIFO, listas de precios |
+| Papelerías | Kits escolares, cotizaciones y precios por volumen | Productos compuestos, presupuestos, escalones de volumen |
+| Ferreterías | Materiales por unidad o fracción, cotización y obra | Unidades fraccionadas, presupuestos, compras, series |
+| Farmacias | Control estricto de caducidad y trazabilidad | FEFO, lotes, alertas de vencimiento, valorización |
+| Electrónica | Control por número de serie y garantía | Series/IMEI, estados de garantía, precios especiales |
+| Refaccionarias | Catálogo amplio, proveedores y crédito | Series, compuestos, proveedores, crédito, listas |
+| Alimentos y bebidas | Recetas, combos y consumo de insumos | Productos compuestos (BOM), inventario FEFO |
 
 ---
 
-## 🚀 Requisitos previos
+## Estado del proyecto
 
-- **JDK 21** o superior
-- **Maven 3.9+** (o usa el wrapper incluido `./mvnw`)
-- **MySQL 8+** con una base de datos creada (`tienda_db` por defecto)
+Backend funcional y cubierto por pruebas. La SPA **Oak POS** consume esta API para dashboard, inventario y ventas.
+
+| Métrica | Valor |
+|---|---|
+| Módulos de dominio | 15 |
+| Controladores REST | 18 |
+| Rutas documentadas | 81 |
+| Migraciones Flyway | 14 (V1, V3–V15) |
+| Pruebas | 81 en 12 clases |
+| Java / Spring Boot | 21 / 4.1.0 |
+| Base de datos | MariaDB 10.11+ |
+
+**Alcance actual:** núcleo listo para integración y despliegue controlado. No incluye timbrado CFDI, integración con básculas ni multi-sucursal; están en el roadmap.
 
 ---
 
-## ⚙️ Configuración
+## Capacidades
 
-La configuración se encuentra en `src/main/resources/application.yml` y **debe ajustarse al entorno**, especialmente credenciales y secretos (usa variables de entorno en producción):
+### Productos y catálogo
 
-```yaml
-server:
-  port: 8081
-  servlet:
-    context-path: /api/v1
+- PLU, nombre, descripción, categoría, unidad de medida y soporte de decimales para granel.
+- Productos compuestos o recetas (BOM) con cálculo de precio sugerido.
+- Imágenes de producto con almacenamiento local, validación MIME con Apache Tika y endpoints de subida, reemplazo y borrado autenticados.
+- Categorías con jerarquía y valorización.
 
-spring:
-  datasource:
-    url: jdbc:mysql://localhost:3306/tienda_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: <USUARIO>
-    password: <CONTRASEÑA>
+### Ventas y caja
 
-jwt:
-  secret: <SECRETO_MIN_32_CARACTERES>
-  expiration-ms: 28800000   # 8 horas de turno
+- Venta con detalle por producto, resolución automática de precio y cálculo de impuestos por línea.
+- Métodos de pago: `EFECTIVO`, `TARJETA` y `CREDITO`.
+- Cancelación de venta con restauración de stock y liberación de series.
+- Turnos de caja con solicitud, autorización, rechazo y cierre con conteo físico.
+- Cajas físicas con activación y desactivación.
+
+### Inventario y trazabilidad
+
+- Lotes con costo de compra, cantidad inicial/actual, recepción y caducidad.
+- Consumo **FEFO** (*First Expired, First Out*) con bloqueo pesimista para evitar condiciones de carrera.
+- Ajustes manuales positivos, negativos y mermas con validación de stock.
+- Alertas de caducidad por niveles y valorización por categoría.
+- Historial de movimientos paginado y filtrable, sin updates ni deletes.
+
+### Precios e impuestos
+
+- Listas de precios por canal o cliente, con escalones de volumen.
+- Precios especiales por cliente-producto.
+- Resolución por prioridad: **precio especial → lista del cliente → lista del canal → precio base**.
+- Caché Caffeine con invalidación automática al cambiar listas o precios especiales.
+- Catálogo de impuestos SAT, asignación por producto y snapshot de tasas en cada línea de venta.
+
+### Clientes y crédito
+
+- RFC, régimen fiscal, datos de contacto y límite de crédito.
+- Ventas a crédito con saldo pendiente y fecha de vencimiento.
+- Cuenta corriente y aging de saldos.
+- Pagos aplicados **FIFO** a las facturas más antiguas, con anulación y reversa.
+
+### Compras y proveedores
+
+- Registro de compras con detalle, creación de lotes y actualización de stock.
+- Pago y cancelación de compras.
+- Catálogo de proveedores con datos fiscales y días de crédito.
+
+### Presupuestos y series
+
+- Presupuestos con ciclo `BORRADOR → ENVIADO → APROBADO → CONVERTIDO` y cancelación.
+- Conversión de presupuesto a venta con consumo FEFO.
+- Series/IMEI con estados `DISPONIBLE`, `VENDIDO`, `RESERVADO`, `GARANTIA` y `DEVUELTO`.
+
+### Seguridad y auditoría
+
+- JWT HS256 con expiración de 8 horas y contraseñas BCrypt.
+- Autorización por rol y endpoint.
+- Registro de auditoría por usuario, acción y entidad.
+- Manejo global de excepciones con respuestas consistentes.
+
+---
+
+## Arquitectura
+
+Aplicación en capas con separación estricta entre transporte, negocio y persistencia.
+
+```text
+src/main/java/com/abarrotes/oakapi
+├── controller      # Endpoints REST
+├── service         # Contratos de negocio
+│   └── impl        # Implementaciones (FEFO, FIFO, precios, ventas)
+├── repository      # Spring Data JPA
+├── model           # Entidades y enums del dominio
+├── dto             # Request/Response
+├── security        # JWT, filtro y autenticación
+├── config          # Seguridad, CORS, OpenAPI, datos iniciales
+├── converter       # Conversores de dominio (régimen fiscal)
+└── exception       # Excepciones y manejador global
 ```
 
-> ⚠️ **Seguridad**: nunca expongas el secreto JWT ni credenciales de la base de datos en el repositorio. Consúmelos desde variables de entorno o un secret manager.
+> El paquete base `com.abarrotes.oakapi` es un nombre legado. El rename a `com.oakapi` está en el roadmap y no afecta la API pública.
 
-### Perfiles disponibles
+### Flujos críticos
 
-- **`default`** (desarrollo): `ddl-auto: validate`, `flyway.enabled: true`, SQL logging enabled
-- **`test`**: `ddl-auto: create`, `flyway.enabled: true`, `baseline-on-migrate: true`
-- **`prod`**: `ddl-auto: validate`, `flyway.enabled: true`, secretos por variables de entorno (`${JWT_SECRET}`, `${DB_PASSWORD}`, etc.), `show-sql: false`, logs JSON, actuator health expuesto, connection pooling HikariCP optimizado
+**Crear venta**
+
+```text
+POST /ventas
+  → validar turno, usuario y cliente
+  → resolver precios (caché)
+  → calcular impuestos por línea y guardar snapshot
+  → validar y reservar stock FEFO
+  → validar límite de crédito si aplica
+  → obtener folio consecutivo
+  → persistir venta, detalle e impuestos
+  → confirmar salida FEFO y movimientos
+  → crear pago/crédito si aplica
+  → registrar auditoría
+```
+
+**Consumo FEFO**
+
+```text
+Por cada línea:
+  → lotes con stock > 0 ordenados por fecha de caducidad ascendente
+  → descontar cantidad del lote más próximo a vencer
+  → registrar MovimientoInventario por cada lote tocado
+```
+
+**Pago a crédito FIFO**
+
+```text
+Registrar pago
+  → saldo disponible = monto
+  → ventas del cliente con saldo > 0, ordenadas por fecha ascendente
+  → aplicar min(saldo disponible, saldo de venta)
+  → registrar aplicación y actualizar saldos
+  → marcar venta como completada cuando llega a cero
+```
+
+**Resolución de precios**
+
+```text
+1. Precio especial cliente-producto
+2. Lista de precios del cliente
+3. Lista del canal por defecto
+4. Precio base del producto
+```
+
+### Decisiones de diseño
+
+- **Snapshots**: precio e impuesto se guardan en el detalle para que cambios futuros no alteren el histórico.
+- **Bloqueo pesimista**: el stock FEFO se reserva con `SELECT ... FOR UPDATE`.
+- **Movimientos inmutables**: el inventario se reconstruye desde `MovimientoInventario`.
+- **Soft delete**: las entidades maestras se desactivan con `activo = false`.
+- **Cache con invalidación explícita**: la resolución de precios se invalida al cambiar listas o precios especiales.
 
 ---
 
-## 📦 Instalación y ejecución
+## Stack
 
-### Desarrollo
+| Capa | Tecnología |
+|---|---|
+| Lenguaje | Java 21 |
+| Framework | Spring Boot 4.1.0 |
+| Persistencia | Spring Data JPA / Hibernate |
+| Base de datos | MariaDB 10.11+ (driver MariaDB 3.4.2) |
+| Migraciones | Flyway 9.22.3 + flyway-mysql |
+| Seguridad | Spring Security + JJWT 0.12.5, BCrypt |
+| Validación | Jakarta Bean Validation |
+| Caché | Caffeine |
+| Documentación | springdoc-openapi 3.1.1 (Swagger UI) |
+| Archivos | Apache Tika 2.9.1 |
+| Build | Maven 3.9+ / wrapper `./mvnw` |
+| Boilerplate | Lombok 1.18.48 |
+| CI | GitHub Actions |
+
+---
+
+## Inicio rápido
+
+### Requisitos
+
+- JDK 21
+- MariaDB 10.11+ o MySQL 8 (con driver JDBC compatible)
+- Maven 3.9+ o el wrapper incluido
+- MariaDB/MySQL escuchando en `localhost:3306`
+
+### 1. Crear la base de datos
+
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/open-mike721/oak-api.git
-cd oak-api
+mariadb -u root -p -e \
+  "CREATE DATABASE IF NOT EXISTS tienda_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+```
 
-# 2. Compilar y ejecutar las pruebas
+### 2. Exportar variables de entorno
+
+```bash
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_NAME=tienda_db
+export DB_USER=root
+export DB_PASSWORD='tu-contraseña'
+export JWT_SECRET="$(openssl rand -base64 32)"
+export APP_UPLOAD_DIR=./uploads/productos
+```
+
+`DB_PASSWORD` y `JWT_SECRET` son obligatorios. No hay credenciales por defecto en el repositorio.
+
+### 3. Compilar y ejecutar
+
+```bash
 ./mvnw clean verify
-
-# 3. Levantar la aplicación (perfil dev por defecto)
 ./mvnw spring-boot:run
 ```
 
-### Producción
-```bash
-# Variables de entorno requeridas
-export JWT_SECRET="base64-secret-min-32-chars"
-export DB_PASSWORD="db-password"
-export DB_HOST=localhost
-export DB_NAME=tienda_db
+La API queda en `http://localhost:8081/api/v1`.
 
-# Ejecutar con perfil prod
-./mvnw spring-boot:run -Dspring.profiles.active=prod
-# O con JAR empaquetado
-java -Dspring.profiles.active=prod -jar target/oak-api-0.0.1-SNAPSHOT.jar
+- Swagger UI: `http://localhost:8081/api/v1/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8081/api/v1/v3/api-docs`
+- Health: `http://localhost:8081/api/v1/actuator/health`
+
+### 4. Datos de demostración (opcional)
+
+Los seeds son manuales y **Flyway no los ejecuta**:
+
+```bash
+mariadb -u root -p tienda_db < src/main/resources/db/seed/seed-dev.sql
+mariadb -u root -p tienda_db < src/main/resources/db/seed/seed-dev-ventas.sql
 ```
 
-> Ver **DEPLOYMENT.md** para guía completa: Flyway, secrets (systemd/Docker/K8s), healthcheck, rollback.
+Usuarios demo del seed:
 
-La API quedará disponible en `http://localhost:8081/api/v1`.
+| Usuario | Contraseña | Rol |
+|---|---|---|
+| `rosa` | `abarrotes123` | ADMINISTRADOR |
+| `jorge` | `abarrotes123` | GERENTE |
+| `lucia` | `abarrotes123` | CAJERO |
+| `marco` | `abarrotes123` | CAJERO |
 
-Al primer arranque, `DataInitializer` precarga datos de demostración si la base de datos está vacía.
+En una instalación limpia no hay endpoint de registro. Provisiona el primer usuario con el seed o con un `INSERT` usando un hash BCrypt.
 
 ---
 
-## 🔐 Autenticación
+## Configuración
 
-Todos los endpoints (excepto `/auth/**`) requieren el header `Authorization: Bearer <token>`.
+### Variables de entorno
 
-### Obtener el token
+| Variable | Descripción | Obligatoria |
+|---|---|---|
+| `DB_HOST` | Host de MariaDB | No (default `localhost`) |
+| `DB_PORT` | Puerto de MariaDB | No (default `3306`) |
+| `DB_NAME` | Nombre de la base de datos | No (default `tienda_db`) |
+| `DB_USER` | Usuario de base de datos | No (default `root`) |
+| `DB_PASSWORD` | Contraseña de base de datos | Sí |
+| `JWT_SECRET` | Secreto de firma JWT (mínimo 32 caracteres) | Sí |
+| `APP_UPLOAD_DIR` | Directorio de imágenes de producto | No (default `./uploads/productos`) |
+| `SPRING_PROFILES_ACTIVE` | Perfil activo (`dev`, `test`, `prod`) | No |
+
+### Perfiles
+
+- **default / dev**: SQL logging activo, `ddl-auto: validate`, Flyway habilitado.
+- **test**: base de datos única por ejecución, Flyway `clean` + `migrate`, uploads en `/tmp`.
+- **prod**: `ddl-auto: none`, SQL logging desactivado, actuator con health/metrics, logs a archivo.
+
+El perfil de producción está versionado en `src/main/resources/application-prod.yml` y solo contiene placeholders.
+
+### Archivos y logs
+
+- Imágenes: `./uploads/productos` (configurable con `APP_UPLOAD_DIR`).
+- Logs: `logs/oak-api.log` (no versionado).
+- Límites de subida: 5 MB por archivo, 10 MB por request.
+
+---
+
+## Seguridad y roles
+
+| Rol | Alcance |
+|---|---|
+| `ADMINISTRADOR` | Acceso completo: configuración, compras, precios, crédito, auditoría y autorización de turnos |
+| `GERENTE` | Gestión comercial y operativa: ventas, inventario, compras, precios, crédito y turnos |
+| `CAJERO` | Operación de mostrador: ventas, consulta de productos, inventario y turnos propios |
+
+- JWT firmado con HS256 y expiración de 8 horas.
+- Contraseñas cifradas con BCrypt.
+- Todos los endpoints requieren `Authorization: Bearer <token>`, excepto `/auth/**`, Swagger/OpenAPI, `actuator/health`, `actuator/info` y la descarga pública de la foto de producto.
+- No incluye refresh tokens, 2FA ni rate limiting; están en el roadmap.
+
+---
+
+## API
+
+Base URL: `http://localhost:8081/api/v1`
+
+El contrato completo y actualizado está en Swagger. Esta tabla es solo un mapa de módulos.
+
+| Prefijo | Módulo |
+|---|---|
+| `/auth` | Login y emisión de JWT |
+| `/productos` | Productos, componentes y fotos |
+| `/categorias` | Categorías |
+| `/inventario` | Lotes, ajustes, alertas, valorización y movimientos |
+| `/ventas` | Ventas y cancelaciones |
+| `/compras` | Compras y recepción |
+| `/proveedores` | Proveedores |
+| `/clientes` | Clientes, cuenta corriente y aging |
+| `/pagos-credito` | Pagos y aplicación FIFO |
+| `/presupuestos` | Cotizaciones y conversión a venta |
+| `/listas-precios` | Listas y escalones |
+| `/precios` | Resolución de precios |
+| `/impuestos` | Catálogo SAT y asignación por producto |
+| `/series` | Series/IMEI |
+| `/cajas` | Cajas físicas |
+| `/turnos` | Apertura, autorización y cierre |
+| `/auditoria` | Consulta de auditoría |
+
+### Ejemplo de login
 
 ```bash
 curl -X POST http://localhost:8081/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"username":"cajero","password":"tu-contraseña"}'
+  -d '{"username":"rosa","password":"abarrotes123"}'
 ```
 
-Respuesta:
-
-```json
-{
-  "token": "eyJhbGciOiJIUzI1NiJ9...",
-  "username": "cajero",
-  "rol": "CAJERO"
-}
-```
-
-### Usar el token
+### Ejemplo de venta
 
 ```bash
-curl http://localhost:8081/api/v1/productos \
-  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
+TOKEN=$(curl -s -X POST http://localhost:8081/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"rosa","password":"abarrotes123"}' | jq -r .token)
+
+curl -X POST http://localhost:8081/api/v1/ventas \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"metodoPago":"EFECTIVO","detalle":[{"productoId":2,"cantidad":1}]}'
 ```
+
+La venta requiere un turno abierto. Consulta `/turnos/solicitar` y `/turnos/{id}/autorizar` en Swagger.
 
 ---
 
-## 📚 Endpoints
+## Modelo de datos
 
-### Auth
+| Entidad | Rol |
+|---|---|
+| `Producto` | Catálogo, PLU, unidad, precio base y flags de compuesto |
+| `ProductoCompuesto` | Receta/BOM de productos compuestos |
+| `Categoria` | Clasificación y valorización |
+| `Lote` | Stock por costo, recepción y caducidad |
+| `MovimientoInventario` | Bitácora inmutable de entradas, salidas y ajustes |
+| `Venta` / `DetalleVenta` | Venta, importes y saldo pendiente |
+| `DetalleVentaImpuesto` | Snapshot de impuestos por línea |
+| `Cliente` | Datos fiscales, crédito y lista de precios |
+| `PagoCredito` / `PagoCreditoAplicacion` | Pagos y aplicación FIFO |
+| `Compra` / `DetalleCompra` | Compras y recepción de lotes |
+| `Proveedor` | Catálogo de proveedores |
+| `Presupuesto` / `PresupuestoDetalle` | Cotizaciones y conversión |
+| `ListaPrecio` / `ListaPrecioDetalle` | Precios por canal y volumen |
+| `Impuesto` / `ProductoImpuesto` | Catálogo SAT y asignación |
+| `Serie` | Series/IMEI y estados |
+| `Caja` / `TurnoCaja` | Cajas, turnos y arqueo |
+| `Usuario` | Credenciales y rol |
+| `LogAuditoria` | Registro de acciones |
 
-| Método | Ruta           | Descripción            | Roles       |
-|--------|----------------|------------------------|-------------|
-| POST   | `/auth/login`  | Login y obtención de JWT | Público    |
-
-### Productos
-
-| Método | Ruta                       | Descripción                              | Roles                        |
-|--------|----------------------------|------------------------------------------|------------------------------|
-| GET    | `/productos`               | Listar todos los productos               | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/productos/{id}`          | Buscar por ID                            | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/productos/plu/{plu}`     | Buscar por código PLU                    | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/productos/categoria/{id}`| Listar productos por categoría           | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/productos/buscar?nombre=`| Buscar por nombre                        | CAJERO, ADMINISTRADOR, GERENTE |
-| POST   | `/productos`               | Crear producto                           | ADMINISTRADOR, GERENTE       |
-| PUT    | `/productos/{id}`          | Actualizar producto                      | ADMINISTRADOR, GERENTE       |
-| DELETE | `/productos/{id}`          | Eliminar producto                        | ADMINISTRADOR, GERENTE       |
-
-### Productos compuestos (recetas)
-
-| Método | Ruta                             | Descripción                            | Roles                        |
-|--------|----------------------------------|----------------------------------------|------------------------------|
-| GET    | `/productos/{padreId}/componentes` | Obtener la receta del producto compuesto | CAJERO, ADMINISTRADOR, GERENTE |
-| POST   | `/productos/{padreId}/componentes` | Agregar un componente a la receta      | ADMINISTRADOR, GERENTE       |
-| PUT    | `/productos/{padreId}/componentes` | Reemplazar la receta completa          | ADMINISTRADOR, GERENTE       |
-| DELETE | `/productos/{padreId}/componentes/{hijoId}` | Eliminar un componente        | ADMINISTRADOR, GERENTE       |
-| DELETE | `/productos/{padreId}/componentes` | Vaciar la receta                       | ADMINISTRADOR, GERENTE       |
-
-### Inventario
-
-| Método | Ruta                                | Descripción                              | Roles                        |
-|--------|-------------------------------------|------------------------------------------|------------------------------|
-| GET    | `/inventario/lotes/{productoId}`    | Lotes disponibles del producto (orden FEFO) | CAJERO, ADMINISTRADOR, GERENTE |
-| POST   | `/inventario/ajustes`               | Registrar ajuste manual (positivo/negativo/merma) | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/inventario/alertas-caducidad?dias=30` | Alertas de caducidad con nivel semafórico | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/inventario/valorizacion`          | Valorización del inventario por categoría | ADMINISTRADOR, GERENTE       |
-| GET    | `/inventario/movimientos`           | Historial paginado y filtrable           | CAJERO, ADMINISTRADOR, GERENTE |
-
-Filtros de `/inventario/movimientos`: `loteId`, `productoId`, `tipo` (`ENTRADA_COMPRA`, `SALIDA_VENTA`, `AJUSTE_POSITIVO`, `AJUSTE_NEGATIVO`, `MERMA`) — paginación con Spring Data (`page`, `size`, `sort`).
-
-### Listas de Precios
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| GET    | `/listas-precios`                 | Listar listas de precios                 | ADMINISTRADOR, GERENTE       |
-| GET    | `/listas-precios/{id}`            | Obtener lista con detalle                | ADMINISTRADOR, GERENTE       |
-| POST   | `/listas-precios`                 | Crear lista de precios                   | ADMINISTRADOR, GERENTE       |
-| PUT    | `/listas-precios/{id}`            | Actualizar lista                         | ADMINISTRADOR, GERENTE       |
-| DELETE | `/listas-precios/{id}`            | Eliminar lista                           | ADMINISTRADOR, GERENTE       |
-| POST   | `/listas-precios/{id}/detalles`   | Agregar/actualizar precio de producto    | ADMINISTRADOR, GERENTE       |
-| DELETE | `/listas-precios/{id}/detalles/{productoId}` | Eliminar precio de producto | ADMINISTRADOR, GERENTE |
-| GET    | `/listas-precios/disponibles`     | Listas vigentes para una fecha           | ADMINISTRADOR, GERENTE       |
-
-### Resolución de Precios
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| GET    | `/precios/resolver?clienteId=1&productoId=1&cantidad=10&fecha=2024-01-15` | Resolver precio según prioridad | CAJERO, ADMINISTRADOR, GERENTE |
-
-**Prioridad**: 1) Precio Especial Cliente-Producto → 2) Lista Cliente → 3) Lista Canal Default → 4) Precio Base Producto. Soporta escalones de volumen.
-
-### Impuestos
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| GET    | `/impuestos`                      | Listar impuestos                         | ADMINISTRADOR, GERENTE       |
-| POST   | `/impuestos`                      | Crear impuesto (IVA, IEPS, retenciones)  | ADMINISTRADOR, GERENTE       |
-| PUT    | `/impuestos/{id}`                 | Actualizar impuesto                      | ADMINISTRADOR, GERENTE       |
-| DELETE | `/impuestos/{id}`                 | Eliminar impuesto                        | ADMINISTRADOR, GERENTE       |
-| POST   | `/impuestos/producto/{productoId}`| Asignar impuesto a producto              | ADMINISTRADOR, GERENTE       |
-| GET    | `/impuestos/producto/{productoId}`| Obtener impuestos de un producto         | ADMINISTRADOR, GERENTE       |
-| DELETE | `/impuestos/producto/{productoId}/{impuestoId}` | Quitar impuesto de producto | ADMINISTRADOR, GERENTE |
-
-### Precios Especiales por Cliente
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| POST   | `/clientes/{clienteId}/precios-especiales` | Crear precio especial cliente-producto | ADMINISTRADOR, GERENTE |
-| GET    | `/clientes/{clienteId}/precios-especiales` | Listar precios especiales del cliente | ADMINISTRADOR, GERENTE |
-| DELETE | `/clientes/{clienteId}/precios-especiales/{productoId}` | Eliminar precio especial | ADMINISTRADOR, GERENTE |
-
-> **Cache invalidation**: Al crear/eliminar precio especial o modificar lista de precios, la caché del resolver se invalida automáticamente.
-
-### Ventas
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| GET    | `/ventas`                         | Listar ventas con filtros                | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/ventas/{uuid}`                  | Obtener venta con detalle e impuestos    | CAJERO, ADMINISTRADOR, GERENTE |
-| POST   | `/ventas`                         | Registrar venta (usa resolver de precios, calcula impuestos, asigna lote FEFO) | CAJERO, ADMINISTRADOR, GERENTE |
-| POST   | `/ventas/{uuid}/cancelar`         | Cancelar venta (restaura stock)          | ADMINISTRADOR, GERENTE       |
-
-**Venta a crédito**: si `metodoPago: CREDITO` → requiere `clienteId`, setea `saldoPendiente = total`, `fechaVencimiento = now + diasCredito`.
-
-**Respuesta de venta** incluye desglose de impuestos por línea:
-```json
-{
-  "uuid": "...",
-  "detalle": [{
-    "productoId": 1,
-    "cantidad": 2,
-    "precioUnitarioAplicado": 100.00,
-    "subtotal": 200.00,
-    "impuestos": [{
-      "impuestoId": 1,
-      "impuestoClave": "IVA16",
-      "impuestoNombre": "IVA 16%",
-      "base": 200.00,
-      "tasa": 0.16,
-      "importeTraslado": 32.00,
-      "importeRetencion": 0.00
-    }]
-  }]
-}
-```
-
-### Clientes
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| GET    | `/clientes`                       | Listar clientes                          | ADMINISTRADOR, GERENTE       |
-| GET    | `/clientes/{id}`                  | Obtener cliente                          | ADMINISTRADOR, GERENTE       |
-| POST   | `/clientes`                       | Crear cliente                            | ADMINISTRADOR, GERENTE       |
-| PUT    | `/clientes/{id}`                  | Actualizar cliente                       | ADMINISTRADOR, GERENTE       |
-| DELETE | `/clientes/{id}`                  | Desactivar cliente (si saldo = 0)        | ADMINISTRADOR, GERENTE       |
-| GET    | `/clientes/{id}/cuenta-corriente` | Cuenta corriente (ventas pendientes + pagos) | ADMINISTRADOR, GERENTE |
-| GET    | `/clientes/{id}/aging`            | Aging de saldos vencidos                 | ADMINISTRADOR, GERENTE       |
-
-### Pagos a Crédito (FIFO)
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| POST   | `/pagos-credito`                  | Registrar pago (monto, método, referencia) | ADMINISTRADOR, GERENTE |
-| POST   | `/pagos-credito/{id}/aplicar-fifo`| Aplicar FIFO a facturas vencidas         | ADMINISTRADOR, GERENTE       |
-| GET    | `/pagos-credito/{id}/aplicaciones`| Ver aplicaciones del pago                | ADMINISTRADOR, GERENTE       |
-| POST   | `/pagos-credito/{id}/anular`      | Anular pago (restaura saldos)            | ADMINISTRADOR, GERENTE       |
-| GET    | `/pagos-credito/cliente/{clienteId}` | Historial de pagos del cliente       | ADMINISTRADOR, GERENTE       |
-
-**FIFO**: El pago se aplica a la factura más antigua vencida primero, creando registros en `Pago_Credito_Aplicacion` con monto aplicado y fecha.
-
-### Presupuestos
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| GET    | `/presupuestos`                   | Listar con filtros                       | ADMINISTRADOR, GERENTE       |
-| GET    | `/presupuestos/{id}`              | Obtener presupuesto                      | ADMINISTRADOR, GERENTE       |
-| POST   | `/presupuestos`                   | Crear presupuesto (BORRADOR)             | ADMINISTRADOR, GERENTE       |
-| POST   | `/presupuestos/{id}/enviar`       | Cambiar a ENVIADO                        | ADMINISTRADOR, GERENTE       |
-| POST   | `/presupuestos/{id}/aprobar`      | Cambiar a APROBADO (registra aprobador)  | ADMINISTRADOR, GERENTE       |
-| POST   | `/presupuestos/{id}/convertir`    | Convertir a venta (requiere APROBADO, usa FEFO para lote_id) | ADMINISTRADOR, GERENTE |
-| POST   | `/presupuestos/{id}/cancelar`     | Cambiar a CANCELADO                      | ADMINISTRADOR, GERENTE       |
-
-### Series / IMEI
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| POST   | `/series/compra`                  | Registrar series en compra               | ADMINISTRADOR, GERENTE       |
-| GET    | `/series/disponibles-venta?productoId=1&cantidad=5` | Obtener N series FIFO para venta | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/series/disponibles-generales?productoId=1&limite=10` | Listar series disponibles (límite) | ADMINISTRADOR, GERENTE |
-| POST   | `/series/venta?productoId=1`      | Vender series específicas                | CAJERO, ADMINISTRADOR, GERENTE |
-| POST   | `/series/cancelar-venta/{ventaId}`| Liberar series por cancelación           | ADMINISTRADOR, GERENTE       |
-| PUT    | `/series/{id}/estado`             | Cambiar estado (DISPONIBLE, VENDIDO, RESERVADO, GARANTIA, DEVUELTO) | ADMINISTRADOR, GERENTE |
-
-### Cajas y Turnos
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| GET    | `/cajas`                          | Listar cajas                             | ADMINISTRADOR, GERENTE       |
-| POST   | `/cajas`                          | Crear caja                               | ADMINISTRADOR, GERENTE       |
-| PUT    | `/cajas/{id}`                     | Actualizar caja                          | ADMINISTRADOR, GERENTE       |
-| POST   | `/cajas/{id}/activar` / `/desactivar` | Activar/desactivar caja              | ADMINISTRADOR, GERENTE       |
-| POST   | `/turnos/solicitar`               | Solicitar apertura de turno              | CAJERO, ADMINISTRADOR, GERENTE |
-| POST   | `/turnos/{id}/autorizar`          | Autorizar turno (ADMIN/GERENTE)          | ADMINISTRADOR, GERENTE       |
-| POST   | `/turnos/{id}/rechazar`           | Rechazar solicitud                       | ADMINISTRADOR, GERENTE       |
-| POST   | `/turnos/{id}/cerrar`             | Cerrar turno con conteo físico           | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/turnos/actual`                  | Turno abierto del usuario actual         | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/turnos/caja/{cajaId}`           | Historial de turnos de una caja          | ADMINISTRADOR, GERENTE       |
-
-### Compras
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| GET    | `/compras`                        | Listar compras                           | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/compras/{id}`                   | Obtener compra con detalle               | CAJERO, ADMINISTRADOR, GERENTE |
-| POST   | `/compras`                        | Registrar compra (crea lotes, actualiza stock) | ADMINISTRADOR, GERENTE |
-| PUT    | `/compras/{id}`                   | Actualizar compra                        | ADMINISTRADOR, GERENTE       |
-| POST   | `/compras/{id}/pagar`             | Marcar compra como pagada                | ADMINISTRADOR, GERENTE       |
-| POST   | `/compras/{id}/cancelar`          | Cancelar compra                          | ADMINISTRADOR, GERENTE       |
-
-### Proveedores
-
-| Método | Ruta                              | Descripción                              | Roles                        |
-|--------|-----------------------------------|------------------------------------------|------------------------------|
-| GET    | `/proveedores`                    | Listar proveedores                       | CAJERO, ADMINISTRADOR, GERENTE |
-| GET    | `/proveedores/{id}`               | Obtener proveedor                        | CAJERO, ADMINISTRADOR, GERENTE |
-| POST   | `/proveedores`                    | Crear proveedor                          | ADMINISTRADOR, GERENTE       |
-| PUT    | `/proveedores/{id}`               | Actualizar proveedor                     | ADMINISTRADOR, GERENTE       |
-| DELETE | `/proveedores/{id}`               | Desactivar proveedor                     | ADMINISTRADOR, GERENTE       |
+Las migraciones están en `src/main/resources/db/migration` (V1, V3–V15).
 
 ---
 
-## 🗂️ Arquitectura
-
-La aplicación sigue una **arquitectura en capas** con responsabilidades bien separadas:
-
-```
-com.abarrotes.oakapi
-├── controller          # Capa REST: expone los endpoints
-├── service             # Interfaz de la lógica de negocio
-│   └── impl            # Implementaciones (FEFO, recetas, etc.)
-├── repository          # Acceso a datos con Spring Data JPA
-├── model               # Entidades JPA y enums del dominio
-├── dto                 # Objetos de transferencia (request/response)
-├── security            # Filtro y servicio JWT
-├── config              # Seguridad, CORS, inicialización de datos
-└── exception           # Excepciones de dominio y manejador global
-```
-
-### Detalles de implementación destacados
-
-- **Consumo FEFO**: `LoteRepository.findLotesDisponiblesFEFOConLock` ordena lotes por caducidad (los que no caducan van al final) y aplica `SELECT ... FOR UPDATE` para garantizar consistencia ante concurrencia.
-- **Migración de lotes**: cada movimiento registra cantidades anterior y nueva (`MovimientoInventario`), creando una pista de auditoría completa por usuario y documento de origen.
-- **Recetas**: los productos compuestos no pueden ser componentes de otros y un producto no puede referenciarse a sí mismo (validaciones de negocio).
-- **Resolución de precios**: servicio con caché Caffeine (TTL 5 min), invalidación automática en cambios de lista de precios o precios especiales.
-- **Impuestos en venta**: se calculan por línea usando `ImpuestoService.obtenerImpuestosDeProducto()`, se guarda snapshot en `Detalle_Venta_Impuesto`.
-- **Presupuesto → Venta**: al convertir, consume stock vía FEFO y asigna `lote_id` a cada `DetalleVenta`.
-
----
-
-## 🧪 Pruebas
+## Pruebas
 
 ```bash
 ./mvnw test
 ```
 
-Incluye 23 pruebas de integración que validan:
-- Resolución de precios por prioridad y escalones de volumen
-- Aplicación FIFO de pagos a crédito
-- Ciclo de vida completo de presupuesto → venta
-- Consumo FEFO de stock con lotes
+- 81 pruebas en 12 clases.
+- Integración contra MariaDB real, no H2.
+- Base de datos única por ejecución (`tienda_db_test_<uuid>`) con `Flyway.clean()` + `migrate()`.
+- Uploads de prueba aislados en `/tmp/uploads/productos`.
 
----
+Para ejecutar localmente necesitas MariaDB activo y `DB_PASSWORD`:
 
-## 🔄 CI/CD
-
-Pipeline en GitHub Actions (`.github/workflows/ci.yml`):
-
-| Job | Trigger | Descripción |
-|-----|---------|-------------|
-| `build-test` | push/PR a `main`, `develop` | Compila, testea (`./mvnw clean verify`) |
-| `flyway-migrate` | push/PR a `main`, `develop` | Migra BD con MySQL service container |
-| `docker-build` | push a `main` / tags | Build & push a GHCR |
-
-Ejecutar localmente:
 ```bash
-# Validar pipeline completo
-./mvnw clean verify flyway:migrate
+DB_PASSWORD='tu-contraseña' ./mvnw test
 ```
 
----
-
-## 📦 Despliegue
-
-Ver **DEPLOYMENT.md** para guía completa:
-- Prerrequisitos (MySQL 8+, JDK 21, env vars)
-- Flyway migration (`./mvnw flyway:migrate`)
-- Inyección de secrets (systemd, Docker, K8s)
-- Profile activation (`-Dspring.profiles.active=prod`)
-- Healthcheck (`GET /actuator/health`)
-- Rollback procedure
+Áreas cubiertas: FEFO, FIFO, resolución de precios, invalidación de caché, ciclo de presupuestos, cierre de turnos, auditoría y subida de imágenes.
 
 ---
 
-## 🛣️ Roadmap
+## CI/CD y despliegue
 
-Los siguientes módulos están contemplados en el dominio (enums/entidades ya definidos) y listos para implementarse:
+Pipeline en `.github/workflows/ci.yml`:
 
-- 🛒 **Compras** con `EstadoCompra` y `DocumentoOrigen.COMPRA`
-- 💵 **Ventas** con `EstadoVenta`, `MetodoPago` y turnos (`EstadoTurno`)
-- 🎁 **Promociones** (`TipoPromocion`)
-- 📝 **Auditoría avanzada** vía `Logs_Auditoria`
-- 🔍 **Cache invalidation test**: test de integración para invalidación granular
-- 🔧 **Spotless/Checkstyle**: formateo automático en CI
-- 🐳 **Docker multi-arch**: build para AMD64/ARM64
+| Job | Descripción |
+|---|---|
+| `build-test` | Compila y ejecuta la suite contra un servicio MariaDB |
+| `flyway-migrate` | Aplica migraciones sobre MySQL 8 |
+| `docker-build` | Build y push a GHCR (inactivo hasta que exista `Dockerfile`) |
+
+Ramas: `master` y `develop`.
+
+La guía completa de despliegue está en [DEPLOYMENT.md](DEPLOYMENT.md): variables, systemd, healthcheck, rollback y checklist.
 
 ---
 
-## 📄 Licencia
+## Roadmap
 
-Proyecto privado / no definido aún. Contacta al mantenedor para más información.
+- Timbrado CFDI 4.0 y notas de crédito.
+- Integración con básculas y lectores de código de barras.
+- Multi-sucursal y multi-almacén.
+- `Dockerfile` e imagen multi-arch.
+- Renombrar paquete base a `com.oakapi` y base de datos a `oak_db`.
+- OpenAPI con metadatos, ejemplos y versión.
+- Observabilidad: métricas Prometheus y trazas.
+- Testcontainers para pruebas de integración.
+- Refresh tokens, 2FA y rate limiting.
+- Modo cajero completo en la SPA Oak POS.
+
+---
+
+## Licencia
+
+**Propietaria. Todos los derechos reservados.**
+
+Copyright (c) 2026 Jose Miguel Perez Rodriguez.
+
+El código se comparte para revisión, desarrollo y pruebas internas por colaboradores autorizados. No se permite redistribución, sublicencia, venta ni uso comercial o de producción por terceros sin autorización escrita.
+
+Consulta [LICENSE](LICENSE) para los términos completos. Para licenciamiento comercial, contacta al titular.
+
+---
+
+## Contacto
+
+- GitHub: [@dev-mike721](https://github.com/dev-mike721)
+- Repositorio: [dev-mike721/oak-api](https://github.com/dev-mike721/oak-api)

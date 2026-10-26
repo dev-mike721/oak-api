@@ -32,8 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 
-# Production config (contains only placeholders, but safe to ignore)
-application-prod.yml
-
 ### Runtime ###
 logs/
+uploads/
